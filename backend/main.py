@@ -48,12 +48,15 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "http://localhost:3000/ai-book",
-        "https://*.github.io",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
     ],
+    allow_origin_regex=r"https://.*\.github\.io",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Session-Id"],
 )
 
 
