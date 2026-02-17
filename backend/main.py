@@ -91,18 +91,20 @@ async def health_check():
         pass
 
     # Check Qdrant
+    qdrant_error = None
     try:
         get_qdrant_client().get_collections()
         services["vector_db"] = "up"
-    except Exception:
-        pass
+    except Exception as e:
+        qdrant_error = str(e)
 
     # Check OpenRouter
+    llm_error = None
     try:
         get_openai_client().models.list()
         services["llm"] = "up"
-    except Exception:
-        pass
+    except Exception as e:
+        llm_error = str(e)
 
     all_up = all(v == "up" for v in services.values())
     any_down = any(v == "down" for v in services.values())
@@ -114,7 +116,12 @@ async def health_check():
     else:
         status = "unhealthy"
 
-    return {"status": status, "services": services}
+    result = {"status": status, "services": services}
+    if qdrant_error:
+        result["qdrant_error"] = qdrant_error
+    if llm_error:
+        result["llm_error"] = llm_error
+    return result
 
 
 @app.post("/api/chat")
