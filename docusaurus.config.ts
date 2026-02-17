@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://QatreenFatima.github.io',
-  baseUrl: '/ai-book/',
+  url: 'https://ai-book.vercel.app',
+  baseUrl: '/',
 
   organizationName: 'QatreenFatima',
   projectName: 'ai-book',
