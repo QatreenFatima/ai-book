@@ -18,9 +18,9 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "qwen/qwen3-embedding-0.6b")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "openai/text-embedding-3-small")
 COLLECTION_NAME = "physical-ai-book"
-VECTOR_SIZE = 1024  # qwen3-embedding-0.6b output dimension
+VECTOR_SIZE = None  # auto-detected from first embedding call
 MAX_CHUNK_TOKENS = 600
 OVERLAP_TOKENS = 100
 
@@ -117,6 +117,12 @@ def chunk_section(title: str, text: str) -> list[tuple[str, str]]:
         chunks.append((title, "\n\n".join(current_parts)))
 
     return chunks
+
+
+def detect_vector_size() -> int:
+    """Detect embedding dimension by running a test embedding."""
+    response = openai_client.embeddings.create(model=EMBEDDING_MODEL, input=["test"])
+    return len(response.data[0].embedding)
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
@@ -244,6 +250,12 @@ def main() -> None:
 
     print(f"Found {len(mdx_files)} MDX files in {docs_path}")
     print(f"Embedding model: {EMBEDDING_MODEL}")
+
+    # Auto-detect vector size
+    global VECTOR_SIZE
+    print("Detecting embedding dimension...", end=" ")
+    VECTOR_SIZE = detect_vector_size()
+    print(f"{VECTOR_SIZE}")
     print(f"Collection: {COLLECTION_NAME} (vector_size={VECTOR_SIZE})")
     print()
 

@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     neon_db_url: str
     admin_api_key: str = "changeme"
     chat_model: str = "qwen/qwen3-max"
-    embedding_model: str = "qwen/qwen3-embedding-0.6b"
+    embedding_model: str = "openai/text-embedding-3-small"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

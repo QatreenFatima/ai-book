@@ -42,9 +42,9 @@ def embed_query(client: OpenAI, query: str) -> list[float]:
 
 def retrieve_chunks(qdrant: QdrantClient, query_embedding: list[float], top_k: int = 5) -> list[dict]:
     """Search Qdrant for the most relevant book chunks."""
-    results = qdrant.search(
+    results = qdrant.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=query_embedding,
+        query=query_embedding,
         limit=top_k,
     )
     return [
@@ -55,7 +55,7 @@ def retrieve_chunks(qdrant: QdrantClient, query_embedding: list[float], top_k: i
             "page_title": hit.payload.get("page_title", ""),
             "score": hit.score,
         }
-        for hit in results
+        for hit in results.points
     ]
 
 
@@ -120,6 +120,7 @@ async def generate_response_stream(
         model=settings.chat_model,
         messages=messages,
         stream=True,
+        max_tokens=1024,
     )
 
     for chunk in response:

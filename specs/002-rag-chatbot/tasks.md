@@ -59,7 +59,7 @@
 - [x] T016 [US1] Add `ensure_collection()` function to `backend/ingest.py`: connect to Qdrant Cloud, create collection `physical-ai-book` if not exists with `VectorParams(size=1024, distance=Distance.COSINE)`, --reset flag to recreate
 - [x] T017 [US1] Add `upsert_chunks(chunks, embeddings, metadata)` function to `backend/ingest.py`: generate UUID for each chunk, upsert to Qdrant with payload `{"text": chunk_text, "source": relative_path, "section_title": heading, "chunk_index": idx, "page_title": title}`
 - [x] T018 [US1] Add CLI entrypoint to `backend/ingest.py`: `if __name__ == "__main__"` with argparse `--docs-path` argument, scan for `*.mdx` files, process each file (parse → chunk → embed → upsert), print summary: files processed, chunks created, errors
-- [ ] T019 [US1] Run `python backend/ingest.py --docs-path ./docs` locally → verify chunks appear in Qdrant Cloud dashboard (check collection `book_chunks` has points with correct payload fields)
+- [x] T019 [US1] Run `python backend/ingest.py --docs-path ./docs` locally → verify chunks appear in Qdrant Cloud dashboard (check collection `book_chunks` has points with correct payload fields)
 
 ### RAG Core Logic
 
