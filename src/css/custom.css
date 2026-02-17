@@ -1,0 +1,43 @@
+/**
+ * Physical AI & Humanoid Robotics Book - Custom Styles
+ * Uses a robotics-themed blue/teal palette
+ */
+
+:root {
+  --ifm-color-primary: #1a73e8;
+  --ifm-color-primary-dark: #1765d0;
+  --ifm-color-primary-darker: #165fc4;
+  --ifm-color-primary-darkest: #124ea2;
+  --ifm-color-primary-light: #2d80eb;
+  --ifm-color-primary-lighter: #3987ec;
+  --ifm-color-primary-lightest: #5e9ef0;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-heading-font-weight: 700;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #4fc3f7;
+  --ifm-color-primary-dark: #2ab7f5;
+  --ifm-color-primary-darker: #17b0f4;
+  --ifm-color-primary-darkest: #0993d1;
+  --ifm-color-primary-light: #74cff9;
+  --ifm-color-primary-lighter: #87d6fa;
+  --ifm-color-primary-lightest: #b8e6fc;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Admonition customization for book warnings */
+.admonition-danger {
+  border-left-width: 4px;
+}
+
+/* Code block titles */
+.codeBlockTitle_node_modules {
+  font-weight: 600;
+}
+
+/* Better reading width for book content */
+.markdown {
+  max-width: 800px;
+}

@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.11+ (backend), TypeScript/React (frontend widget) + FastAPI, uvicorn, openai (OpenRouter-compatible), qdrant-client, asyncpg, python-frontmatter, tiktoken, pydantic (002-rag-chatbot)
+- Qdrant Cloud (vectors, 1GB free tier), Neon Serverless Postgres (chat history, free tier) (002-rag-chatbot)
+
+## Recent Changes
+- 002-rag-chatbot: Added Python 3.11+ (backend), TypeScript/React (frontend widget) + FastAPI, uvicorn, openai (OpenRouter-compatible), qdrant-client, asyncpg, python-frontmatter, tiktoken, pydantic

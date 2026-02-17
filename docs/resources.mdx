@@ -1,0 +1,206 @@
+---
+id: resources
+title: "Resources & Further Reading"
+sidebar_label: "Resources"
+sidebar_position: 8
+---
+
+# Resources & Further Reading
+
+## Official Documentation
+
+### ROS 2
+
+- [ROS 2 Humble Documentation](https://docs.ros.org/en/humble/) — Official documentation for ROS 2 Humble Hawksbill (LTS)
+- [ROS 2 Tutorials](https://docs.ros.org/en/humble/Tutorials.html) — Step-by-step beginner to advanced tutorials
+- [rclpy API Reference](https://docs.ros2.org/latest/api/rclpy/) — Python client library documentation
+- [ROS 2 Design Articles](https://design.ros2.org/) — Architectural decisions and specifications
+- [REP Index](https://www.ros.org/reps/rep-0000.html) — ROS Enhancement Proposals (standards and conventions)
+
+### Simulation
+
+- [Gazebo Harmonic Documentation](https://gazebosim.org/docs/harmonic/) — Official guides and API reference
+- [SDF Format Specification](http://sdformat.org/spec) — Simulation Description Format reference
+- [URDF Specification](https://wiki.ros.org/urdf/XML) — Unified Robot Description Format reference
+- [Unity ML-Agents Toolkit](https://github.com/Unity-Technologies/ml-agents) — RL training framework for Unity
+- [Unity Robotics Hub](https://github.com/Unity-Technologies/Unity-Robotics-Hub) — ROS integration for Unity
+- [MuJoCo Documentation](https://mujoco.readthedocs.io/) — DeepMind's physics simulator (alternative to Gazebo)
+
+### NVIDIA Isaac
+
+- [Isaac Sim Documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/) — Full Isaac Sim user guide
+- [Isaac Gym](https://developer.nvidia.com/isaac-gym) — GPU-accelerated RL framework
+- [IsaacGymEnvs](https://github.com/NVIDIA-Omniverse/IsaacGymEnvs) — Benchmark RL environments
+- [Omniverse Replicator](https://docs.omniverse.nvidia.com/replicator/latest/) — Synthetic data generation
+- [NVIDIA NGC Catalog](https://catalog.ngc.nvidia.com/) — Pre-built containers and models
+
+### VLA Models & AI
+
+- [Octo GitHub Repository](https://github.com/octo-model/octo) — Open-source generalist robot policy
+- [OpenVLA GitHub Repository](https://github.com/openvla/openvla) — Open-source 7B VLA model
+- [Hugging Face Transformers](https://huggingface.co/docs/transformers/) — Model loading and inference
+- [PyTorch Documentation](https://pytorch.org/docs/) — Deep learning framework
+- [JAX Documentation](https://jax.readthedocs.io/) — Required for Octo model
+
+---
+
+## Hardware Recommendations
+
+### GPU Tiers
+
+| Tier | GPU | VRAM | Price Range | Use Cases |
+|------|-----|------|-------------|-----------|
+| **Budget** | RTX 3060 | 12 GB | $300-350 | Gazebo, Isaac Gym (1024 envs), Octo inference |
+| **Mid-Range** | RTX 3080 / 4070 Ti | 10-12 GB | $500-700 | Isaac Sim, OpenVLA (quantized), moderate RL training |
+| **High-End** | RTX 4090 | 24 GB | $1,600-2,000 | Full Isaac Sim, OpenVLA (fp16), large-scale RL |
+| **Research** | A100 (cloud) | 40-80 GB | $1-3/hr (cloud) | VLA fine-tuning, 8192+ parallel RL envs |
+
+:::tip Cloud GPUs for Students
+If you cannot afford a dedicated GPU:
+- **Google Colab Pro** ($10/month): T4 GPU, adequate for Octo inference and small RL experiments
+- **Google Colab Pro+** ($50/month): A100 GPU, suitable for VLA fine-tuning
+- **Lambda Cloud**: A100 instances at $1.10/hr
+- **Vast.ai**: Community GPU marketplace, often cheaper than major cloud providers
+:::
+
+### Robot Platforms
+
+| Platform | Type | Price | ROS 2 Support | Use Case |
+|----------|------|-------|---------------|----------|
+| **TurtleBot 4** | Mobile | $1,200 | Native | Navigation, SLAM |
+| **Unitree Go2** | Quadruped | $1,600 | Community | Locomotion |
+| **Unitree H1** | Humanoid | $90,000+ | Community | Full humanoid research |
+| **Franka Emika Panda** | Arm | $20,000+ | Native | Manipulation |
+| **UR5e** | Arm | $25,000+ | Native | Industrial manipulation |
+| **Trossen ViperX 300** | Arm | $5,000 | Community | Affordable arm research |
+| **Koch v1.1** | Arm | $400 (DIY) | Community | Budget manipulation |
+
+### Sensors
+
+| Sensor | Type | Price | Interface | Recommended For |
+|--------|------|-------|-----------|-----------------|
+| **Intel RealSense D435i** | RGB-D Camera | $300 | USB | Object detection, depth mapping |
+| **Intel RealSense L515** | LiDAR Camera | $350 | USB | Precision 3D scanning |
+| **Velodyne VLP-16** | 3D LiDAR | $4,000 | Ethernet | SLAM, navigation |
+| **RPLiDAR A1** | 2D LiDAR | $100 | USB | Budget navigation |
+| **Logitech C920** | RGB Camera | $60 | USB | Basic vision tasks |
+
+---
+
+## Further Reading
+
+### Textbooks
+
+- **Probabilistic Robotics** — Thrun, Burgard, Fox (2005). The foundational textbook for robot perception and SLAM.
+- **Modern Robotics** — Lynch, Park (2017). Comprehensive coverage of kinematics, dynamics, and control. [Free online](http://hades.mech.northwestern.edu/index.php/Modern_Robotics)
+- **Robotics: Modelling, Planning and Control** — Siciliano et al. (2009). Advanced control theory for robotic arms.
+- **Reinforcement Learning: An Introduction** — Sutton, Barto (2018). The standard RL textbook. [Free online](http://incompleteideas.net/book/the-book-2nd.html)
+- **Deep Learning** — Goodfellow, Bengio, Courville (2016). Foundation for understanding neural networks. [Free online](https://www.deeplearningbook.org/)
+
+### Key Research Papers
+
+**Foundation Models for Robotics:**
+- [RT-1: Robotics Transformer](https://arxiv.org/abs/2212.06817) — Google's first large-scale robot transformer (2022)
+- [RT-2: Vision-Language-Action Models](https://arxiv.org/abs/2307.15818) — VLM directly outputs robot actions (2023)
+- [PaLM-E: An Embodied Multimodal Language Model](https://arxiv.org/abs/2303.03378) — 562B embodied model (2023)
+- [Octo: An Open-Source Generalist Robot Policy](https://arxiv.org/abs/2405.12213) — Open-source VLA (2024)
+- [OpenVLA: An Open-Source Vision-Language-Action Model](https://arxiv.org/abs/2406.09246) — 7B VLA (2024)
+
+**Simulation and Sim-to-Real:**
+- [Isaac Gym: High Performance GPU-Based Physics Simulation](https://arxiv.org/abs/2108.10470) — NVIDIA's parallel RL framework (2021)
+- [Sim-to-Real Transfer in Deep Reinforcement Learning](https://arxiv.org/abs/2009.13303) — Survey of transfer methods (2020)
+- [Domain Randomization for Sim-to-Real Transfer](https://arxiv.org/abs/1703.06907) — Foundational domain randomization paper (2017)
+
+**Humanoid Robotics:**
+- [Learning Agile and Dynamic Motor Skills for Legged Robots](https://arxiv.org/abs/1901.08652) — ANYmal locomotion (2019)
+- [Learning Humanoid Locomotion with Transformers](https://arxiv.org/abs/2303.03381) — Transformer-based humanoid control (2023)
+- [DexMV: Imitation Learning for Dexterous Manipulation](https://arxiv.org/abs/2108.05877) — Multi-finger manipulation (2021)
+
+### Online Courses
+
+- [ROS 2 for Beginners](https://www.theconstructsim.com/) — The Construct: interactive ROS 2 courses with simulated robots
+- [Self-Driving Cars Specialization](https://www.coursera.org/specializations/self-driving-cars) — University of Toronto on Coursera (perception, planning, control)
+- [CS231n: Deep Learning for Computer Vision](http://cs231n.stanford.edu/) — Stanford (free lecture videos and assignments)
+- [CS285: Deep Reinforcement Learning](https://rail.eecs.berkeley.edu/deeprlcourse/) — UC Berkeley (free lecture videos)
+- [fast.ai Practical Deep Learning](https://course.fast.ai/) — Hands-on deep learning course (free)
+
+### Community Resources
+
+- [ROS Discourse](https://discourse.ros.org/) — Official ROS discussion forum
+- [Robotics Stack Exchange](https://robotics.stackexchange.com/) — Q&A for robotics
+- [r/robotics](https://reddit.com/r/robotics) — Reddit robotics community
+- [Open Robotics](https://www.openrobotics.org/) — Organization behind ROS and Gazebo
+- [NVIDIA Developer Forums](https://forums.developer.nvidia.com/c/omniverse/isaac-sim/) — Isaac Sim community
+
+---
+
+## Environment Setup Cheat Sheet
+
+### Version Compatibility Matrix
+
+| Tool | Version | Ubuntu | Python | CUDA |
+|------|---------|--------|--------|------|
+| **ROS 2 Humble** | LTS (2027) | 22.04 | 3.10 | N/A |
+| **Gazebo Harmonic** | LTS | 22.04 | N/A | N/A |
+| **Isaac Sim** | 4.2+ | 22.04 | 3.10 | 12.1+ |
+| **Isaac Gym** | Preview 4 | 20.04/22.04 | 3.8-3.10 | 11.8+ |
+| **PyTorch** | 2.1+ | 22.04 | 3.10 | 12.1 |
+| **Octo** | Latest | 22.04 | 3.10 | 12.1 |
+| **OpenVLA** | Latest | 22.04 | 3.10 | 12.1 |
+
+### Quick Setup Commands
+
+```bash
+# === ROS 2 Humble (Ubuntu 22.04) ===
+sudo apt install ros-humble-desktop python3-colcon-common-extensions
+source /opt/ros/humble/setup.bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+# === Gazebo Harmonic + ROS 2 Bridge ===
+sudo apt install gz-harmonic ros-humble-ros-gz
+
+# === Python Virtual Environment for AI ===
+python3 -m venv ~/robot_ai_env
+source ~/robot_ai_env/bin/activate
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+pip install transformers accelerate octo-model
+
+# === Isaac Sim via Docker ===
+docker pull nvcr.io/nvidia/isaac-sim:4.2.0
+docker run --gpus all -e "ACCEPT_EULA=Y" --network=host \
+  nvcr.io/nvidia/isaac-sim:4.2.0
+
+# === Workspace Setup ===
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+colcon build
+source install/setup.bash
+
+# === Verify Everything ===
+ros2 doctor                  # Check ROS 2 health
+gz sim --version             # Check Gazebo version
+python -c "import torch; print(torch.cuda.is_available())"  # Check GPU
+nvidia-smi                   # Check GPU driver
+```
+
+### Common Environment Variables
+
+```bash
+# ROS 2
+export ROS_DOMAIN_ID=0              # Isolate ROS 2 networks
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp  # DDS implementation
+
+# Gazebo
+export GZ_SIM_RESOURCE_PATH=~/ros2_ws/src  # Model search path
+
+# NVIDIA
+export CUDA_VISIBLE_DEVICES=0       # Select GPU
+export NVIDIA_VISIBLE_DEVICES=all   # Docker GPU access
+
+# Python
+export PYTHONPATH=$PYTHONPATH:~/ros2_ws/install/lib/python3.10/dist-packages
+```
+
+---
+
+*This book is a living document. For the latest updates, corrections, and additional resources, visit the [GitHub repository](https://github.com/your-username/ai-book).*

@@ -1,0 +1,230 @@
+openapi: "3.1.0"
+info:
+  title: RAG Chatbot API
+  version: "1.0.0"
+  description: Backend API for the Physical AI book RAG chatbot
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://{deployment-host}
+    description: Production
+
+paths:
+  /api/health:
+    get:
+      operationId: healthCheck
+      summary: Health check endpoint
+      description: Reports status of backend, vector database, and LLM service
+      responses:
+        "200":
+          description: All services healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: One or more services unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/chat:
+    post:
+      operationId: chat
+      summary: Send a chat message and receive a streamed response
+      description: |
+        Accepts a user message with optional conversation history and selected text.
+        Returns a streaming SSE response with the assistant's answer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Streamed SSE response
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  SSE stream. Each event is `data: {"content": "...", "sources": [...]}\n\n`.
+                  Final event is `data: [DONE]\n\n`.
+        "400":
+          description: Invalid request (missing message, exceeds length limit)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Backend service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/sessions/{session_id}/messages:
+    get:
+      operationId: getSessionMessages
+      summary: Retrieve chat history for a session
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of messages in the session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionMessagesResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/ingest:
+    post:
+      operationId: ingestContent
+      summary: Re-index book content (admin only)
+      description: |
+        Reads all .mdx files from docs/, chunks them, generates embeddings,
+        and upserts to the vector database. Protected by admin API key.
+      security:
+        - adminApiKey: []
+      responses:
+        "200":
+          description: Ingestion completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResponse"
+        "401":
+          description: Unauthorized — missing or invalid admin key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    adminApiKey:
+      type: apiKey
+      in: header
+      name: X-Admin-Key
+
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          maxLength: 2000
+          description: The user's question
+        session_id:
+          type: string
+          format: uuid
+          description: Existing session ID to continue (omit for new session)
+        selected_text:
+          type: string
+          maxLength: 5000
+          description: Optional highlighted text from the page for contextual Q&A
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - services
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        services:
+          type: object
+          properties:
+            backend:
+              type: string
+              enum: [up, down]
+            vector_db:
+              type: string
+              enum: [up, down]
+            llm:
+              type: string
+              enum: [up, down]
+            postgres:
+              type: string
+              enum: [up, down]
+
+    SessionMessagesResponse:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        sources:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/Source"
+        created_at:
+          type: string
+          format: date-time
+
+    Source:
+      type: object
+      properties:
+        page_path:
+          type: string
+        section_title:
+          type: string
+        relevance_score:
+          type: number
+          format: float
+
+    IngestResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, partial, failed]
+        files_processed:
+          type: integer
+        chunks_created:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
