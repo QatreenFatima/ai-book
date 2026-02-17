@@ -11,7 +11,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://ai-book.vercel.app',
+  url: 'https://ai-book-rouge.vercel.app',
   baseUrl: '/',
 
   organizationName: 'QatreenFatima',
