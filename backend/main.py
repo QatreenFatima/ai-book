@@ -3,9 +3,9 @@
 import json
 import subprocess
 import sys
-from contextlib import asynccontextmanager
 from pathlib import Path
 
+import asyncpg
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -24,24 +24,40 @@ class ChatRequest(BaseModel):
     selected_text: str | None = None
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Startup: create DB pool + init schema. Shutdown: close pool."""
-    app.state.db_pool = await db.create_pool()
-    await db.init_db(app.state.db_pool)
-    app.state.qdrant = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key)
-    app.state.openai = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=settings.openrouter_api_key,
-    )
-    yield
-    await app.state.db_pool.close()
+# Shared clients (initialized lazily for serverless compatibility)
+_openai_client: OpenAI | None = None
+_qdrant_client: QdrantClient | None = None
+_db_pool: asyncpg.Pool | None = None
+
+
+def get_openai_client() -> OpenAI:
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=settings.openrouter_api_key,
+        )
+    return _openai_client
+
+
+def get_qdrant_client() -> QdrantClient:
+    global _qdrant_client
+    if _qdrant_client is None:
+        _qdrant_client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key)
+    return _qdrant_client
+
+
+async def get_db_pool() -> asyncpg.Pool:
+    global _db_pool
+    if _db_pool is None:
+        _db_pool = await db.create_pool()
+        await db.init_db(_db_pool)
+    return _db_pool
 
 
 app = FastAPI(
     title="Physical AI Book RAG Chatbot",
     version="1.0.0",
-    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -52,7 +68,7 @@ app.add_middleware(
         "http://localhost:3002",
         "http://localhost:3003",
     ],
-    allow_origin_regex=r"https://.*\.github\.io",
+    allow_origin_regex=r"https://.*\.(vercel\.app|github\.io)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,7 +83,8 @@ async def health_check():
 
     # Check Postgres
     try:
-        async with app.state.db_pool.acquire() as conn:
+        pool = await get_db_pool()
+        async with pool.acquire() as conn:
             await conn.fetchval("SELECT 1")
         services["postgres"] = "up"
     except Exception:
@@ -75,14 +92,14 @@ async def health_check():
 
     # Check Qdrant
     try:
-        app.state.qdrant.get_collections()
+        get_qdrant_client().get_collections()
         services["vector_db"] = "up"
     except Exception:
         pass
 
-    # Check OpenRouter (lightweight models list call)
+    # Check OpenRouter
     try:
-        app.state.openai.models.list()
+        get_openai_client().models.list()
         services["llm"] = "up"
     except Exception:
         pass
@@ -103,15 +120,14 @@ async def health_check():
 @app.post("/api/chat")
 async def chat(request: Request, body: ChatRequest):
     """Send a chat message and receive a streamed SSE response."""
-    # Validate message length
     if not body.message or not body.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     if len(body.message) > 2000:
         raise HTTPException(status_code=400, detail="Message exceeds 2000 character limit")
 
-    pool = request.app.state.db_pool
-    openai_client = request.app.state.openai
-    qdrant_client = request.app.state.qdrant
+    pool = await get_db_pool()
+    openai_client = get_openai_client()
+    qdrant_client = get_qdrant_client()
 
     # Create or validate session
     if body.session_id:
@@ -127,16 +143,13 @@ async def chat(request: Request, body: ChatRequest):
 
     # Load conversation history
     history_rows = await db.get_messages_by_session(pool, session_id)
-    # Exclude the message we just saved (last one) to avoid duplication in prompt
     history = [{"role": m["role"], "content": m["content"]} for m in history_rows[:-1]]
 
     # Build prompt based on mode
     sources = None
     if body.selected_text and body.selected_text.strip():
-        # Selected-text mode: use selected text as context, skip retrieval
         messages = rag.build_selected_text_prompt(body.message, body.selected_text, history)
     else:
-        # General Q&A: embed question, retrieve chunks, build prompt
         try:
             query_embedding = rag.embed_query(openai_client, body.message)
             chunks = rag.retrieve_chunks(qdrant_client, query_embedding, top_k=5)
@@ -145,13 +158,11 @@ async def chat(request: Request, body: ChatRequest):
             raise HTTPException(status_code=503, detail="Retrieval service unavailable")
         messages = rag.build_prompt(body.message, chunks, history)
 
-    # Collect full response for saving to DB
     collected_content = []
 
     async def stream_and_collect():
         try:
             async for event in rag.generate_response_stream(openai_client, messages, sources):
-                # Parse content from SSE for DB storage
                 if event.startswith("data: ") and event.strip() != "data: [DONE]":
                     try:
                         data = json.loads(event[6:].strip())
@@ -164,7 +175,6 @@ async def chat(request: Request, body: ChatRequest):
             yield 'data: {"error": "Stream interrupted. Please try again."}\n\n'
             yield "data: [DONE]\n\n"
 
-        # Save assistant response to DB after streaming completes
         full_response = "".join(collected_content)
         if full_response:
             source_refs = None
@@ -190,9 +200,9 @@ async def chat(request: Request, body: ChatRequest):
 
 
 @app.get("/api/sessions/{session_id}/messages")
-async def get_session_messages(request: Request, session_id: str):
+async def get_session_messages(session_id: str):
     """Retrieve chat history for a session."""
-    pool = request.app.state.db_pool
+    pool = await get_db_pool()
     session = await db.get_session(pool, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -209,7 +219,6 @@ async def ingest_docs(
     if not x_admin_key or x_admin_key != settings.admin_api_key:
         raise HTTPException(status_code=401, detail="Invalid or missing admin API key")
 
-    # Run ingest.py as a subprocess
     ingest_script = Path(__file__).parent / "ingest.py"
     docs_path = Path(__file__).parent.parent / "docs"
 
@@ -226,7 +235,6 @@ async def ingest_docs(
     except subprocess.TimeoutExpired:
         raise HTTPException(status_code=504, detail="Ingestion timed out after 5 minutes")
 
-    # Parse output for summary
     output_lines = result.stdout.strip().split("\n") if result.stdout else []
     files_processed = 0
     chunks_created = 0

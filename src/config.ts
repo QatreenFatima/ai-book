@@ -4,5 +4,5 @@
  */
 export const BACKEND_URL =
   process.env.NODE_ENV === "production"
-    ? "https://your-backend.onrender.com" // TODO: Replace with actual deployment URL
+    ? "https://backend-tau-gold-51.vercel.app"
     : "http://localhost:8000";
