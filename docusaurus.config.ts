@@ -11,10 +11,10 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://your-username.github.io',
+  url: 'https://QatreenFatima.github.io',
   baseUrl: '/ai-book/',
 
-  organizationName: 'your-username',
+  organizationName: 'QatreenFatima',
   projectName: 'ai-book',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
@@ -63,7 +63,7 @@ const config: Config = {
           label: 'Book',
         },
         {
-          href: 'https://github.com/your-username/ai-book',
+          href: 'https://github.com/QatreenFatima/ai-book',
           label: 'GitHub',
           position: 'right',
         },
@@ -92,7 +92,7 @@ const config: Config = {
           title: 'Community',
           items: [
             {label: 'ROS Discourse', href: 'https://discourse.ros.org/'},
-            {label: 'GitHub', href: 'https://github.com/your-username/ai-book'},
+            {label: 'GitHub', href: 'https://github.com/QatreenFatima/ai-book'},
           ],
         },
       ],
